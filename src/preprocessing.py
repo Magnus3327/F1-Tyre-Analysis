@@ -47,8 +47,8 @@ def split_stints(df):
         threshold = fastest * 1.04 
         stint_df = stint_df[stint_df["LapTime_Sec"] <= threshold]
 
-        if len(stint_df) < 10:
-            print(f"⚠️ Stint {int(stint)} ignorato: <10 giri (insufficienti).")
+        if len(stint_df) < 7:
+            print(f"⚠️ Stint {int(stint)} ignorato: <7 giri (insufficienti).")
             continue
             
         stints[stint] = stint_df
