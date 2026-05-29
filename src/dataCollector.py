@@ -11,6 +11,7 @@ def get_driver_data(year, gp, driver):
     Scarica i dati dei giri per un pilota specifico in un determinato GP.
     """
 
+    driver = driver.upper()
     print(f"🔄 Download dati telemetrici: {year} {gp} - Pilota: {driver}...")
     try:
         session = fastf1.get_session(year, gp, 'R')

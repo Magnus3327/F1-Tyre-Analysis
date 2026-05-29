@@ -31,7 +31,7 @@ def save_plots(df, model, stint, compound, mae, year, gp, driver, outlier_mask, 
     df_smooth = pd.DataFrame({"TyreLife": x_smooth, "TyreLife2": x_smooth ** 2})
     y_pred_smooth = model.predict(df_smooth)
 
-    plt.plot(x_smooth, y_pred_smooth, linewidth=3, color="red", label="Trend ML (Usura Pura)")
+    plt.plot(x_smooth, y_pred_smooth, linewidth=3, color="darkorange", label="Trend ML (Usura Pura)")
 
     plt.xlabel("Vita Gomma (Giri)")
     plt.ylabel("Tempo sul Giro (s)")
@@ -61,7 +61,7 @@ def plot_summary_bar_chart(df_results, output_folder):
     driver = df_results["Driver"].iloc[0]
     
     # Mappa colori per le mescole normalmente usate in F1
-    colors = {"SOFT": "red", "MEDIUM": "yellow", "HARD": "white", "INTERMEDIATE": "green", "WET": "blue"}
+    colors = {"SOFT": "red", "MEDIUM": "yellow", "HARD": "lightgray", "INTERMEDIATE": "green", "WET": "blue"}
     
     x_labels = [f"Stint {int(row['Stint'])}\n({row['Compound']})" for _, row in df_results.iterrows()]
     bar_colors = [colors.get(row['Compound'].upper(), "gray") for _, row in df_results.iterrows()]

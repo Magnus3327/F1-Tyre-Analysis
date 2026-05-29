@@ -1,17 +1,17 @@
 # 🏎️ F1-Tyre-Analysis
 
-Progetto universitario per l'analisi predittiva e la stima del degrado degli pneumatici in Formula 1 tramite tecniche di **Physics-Informed Machine Learning**.
+Progetto universitario per l'analisi predittiva e la stima del degrado degli pneumatici in Formula 1 tramite integrazione di **Domain Knowledge** e modelli di **Machine Learning robusto**.
 
-Il software utilizza i dati telemetrici ufficiali (tramite l'API `FastF1`) per isolare il puro consumo della mescola dall'effetto del consumo di carburante e dal rumore statistico della pista, fornendo metriche accurate per il supporto alle decisioni strategiche.
+Il software utilizza i dati telemetrici ufficiali (tramite l'API `FastF1`) per isolare il puro consumo della mescola dall'effetto del consumo di carburante e dal rumore statistico della pista, fornendo stime robuste del degrado per il supporto alle decisioni strategiche.
 
 ---
 
 ## 🧠 Metodologia Scientifica
 
-A differenza dei modelli di regressione standard, **F1-Tyre-Analysis** adotta un approccio ibrido per garantire la coerenza fisica dei risultati:
+A differenza dei modelli di regressione standard, **F1-Tyre-Analysis** adotta un approccio ibrido per favorire risultati fisicamente plausibili:
 
-1. **Physics-Informed (PIML):** Il modello integra una conoscenza fisica a priori (penalità deterministica di 0.03s per ogni kg di carburante a bordo) per risolvere il problema della multicollinearità tra l'alleggerimento della vettura e l'usura della gomma.
-2. **Regressione Robusta (Huber):** Utilizza una *Huber Loss function* per gestire gli outlier. Questo approccio permette all'algoritmo di ignorare matematicamente i giri anomali (traffico, bloccaggi, errori di guida) senza che questi distorcano la curva di degrado reale.
+1. **Domain Knowledge Integration:** Il modello integra una conoscenza empirica a priori (penalità deterministica di 0.03s per ogni kg di carburante a bordo) per risolvere il problema della multicollinearità tra l'alleggerimento della vettura e l'usura della gomma.
+2. **Regressione Robusta (Huber):** Utilizza una *Huber Loss function* per gestire gli outlier. Questo approccio permette all'algoritmo di ridurre l'impatto statistico degli outlier (traffico, bloccaggi, errori di guida) senza che questi distorcano la curva di degrado reale.
 3. **Validazione MAE:** Il sistema è validato tramite *Mean Absolute Error* (MAE) con K-Fold Cross-Validation dinamica. A differenza dell'R², il MAE offre una valutazione lineare dell'errore espressa direttamente in secondi/giro, garantendo un'interpretazione ingegneristica immediata.
 
 ---
@@ -20,7 +20,7 @@ A differenza dei modelli di regressione standard, **F1-Tyre-Analysis** adotta un
 
 La pipeline è modulare e suddivisa nei seguenti script:
 
-- 📥 **`dataCollector.py`**: Gestisce l'ingestion dei dati tramite `FastF1`. Ottimizzato per scaricare solo la telemetria necessaria, riducendo l'uso di banda e memoria.
+- 📥 **`dataCollector.py`**: Gestisce l'ingestion dei dati tramite `FastF1`. Ottimizzato per scaricare solo la telemetria necessaria.
 - 🧹 **`preprocessing.py`**: Pulisce i dati rimuovendo anomalie (Safety Car, pit-stop, giri non a regime) e genera le feature polinomiali (`TyreLife²`) per catturare il "cliff" prestazionale.
 - 🧠 **`modelTraining.py`**: Il cuore algoritmico. Applica la correzione del carburante e addestra il regressore Huber per estrarre il coefficiente di degrado puro.
 - 📊 **`plotter.py`**: Genera visualizzazioni professionali sovrapponendo i dati reali corretti al trend predittivo calcolato.
@@ -53,9 +53,9 @@ pip install -r requirements.txt
 
 ## 🚀 Guida all'Uso
 
-Lo script `main.py` accetta tre argomenti obbligatori da riga di comando:
+Lo script `src/main.py` accetta tre argomenti obbligatori da riga di comando:
 
-python main.py --year 2024 --gp "Italian Grand Prix" --driver "LEC"
+python src/main.py --year 2024 --gp "Italian Grand Prix" --driver "LEC"
 
 ### Parametri:
 - `--year`: Anno del campionato.
@@ -76,6 +76,24 @@ I risultati vengono salvati automaticamente nella directory `plots/<year>_<gp>_<
 
 ## 🛠️ Note Tecniche sulla Selezione delle Feature
 Il modello finale esclude deliberatamente la temperatura della pista (`TrackTemp`) come variabile indipendente. Test sperimentali hanno dimostrato che l'inclusione di variabili ambientali stocastiche introduceva rumore eccessivo (overfitting) su stint singoli. La rimozione della temperatura ha permesso di ridurre l'errore MAE medio del 30% e stabilizzare i coefficienti di degrado su valori fisicamente coerenti con il comportamento delle mescole Pirelli.
+
+---
+
+## 📚 Riferimenti e Fonti
+
+In conformità con le linee guida accademiche del corso, si indicano di seguito le fonti e le ispirazioni tecniche utilizzate per lo sviluppo del progetto:
+
+1. **FastF1 API (Raccolta Telemetria):** 
+   * Repository ufficiale: [FastF1 on GitHub](https://github.com/theoehrly/Fast-F1)
+   * Documentazione tecnica: [FastF1 Docs](https://theoehrly.github.io/Fast-F1/)
+2. **Scikit-Learn (Infrastruttura Machine Learning):**
+   * Huber Regressor: [Scikit-Learn HuberRegressor Documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.HuberRegressor.html)
+3. **Costante di Dominio F1 (Penalità Carburante):**
+   * La costante empirica di $0.03 \text{ s/kg}$ (secondi persi per ogni kg di benzina a bordo) è ricavata dalla letteratura classica di dinamica del veicolo applicata al motorsport, tra cui:
+     * *Milliken, W. F., & Milliken, D. L. (1995). "Race Car Vehicle Dynamics"*.
+     * Analisi ingegneristiche e discussioni tecniche della community di [F1Technical](https://www.f1technical.net/).
+4. **Uso di GenAI (Università di Trento Guidelines):**
+   * In linea con le linee guida d'ateneo sull'uso responsabile dell'IA generativa, si dichiara l'utilizzo dell'assistente AI *Antigravity* (basato su modello *Gemini 3 Flash* di Google DeepMind) per attività di supporto al debugging del codice. Si precisa esplicitamente che tutti i testi della documentazione e del report sono stati interamente concepiti e ideati dall'autore, e l'assistente virtuale è stato impiegato esclusivamente come supporto nell'impaginazione e nella revisione dei contenuti per migliorarne la sintassi, l'italiano e l'efficacia descrittiva complessiva.
 
 ---
 **Autore:** Matteo Miglio  
